@@ -83,7 +83,7 @@ const transporter = nodemailer.createTransport({
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
-});
+} as any);
 
 app.post('/api/contact', async (req, res) => {
     const { name, email, subject, message } = req.body;
@@ -142,9 +142,10 @@ app.post('/api/contact', async (req, res) => {
 
         // Debug Config (don't log full password)
         console.log('SMTP Config:', {
-            host: process.env.SMTP_HOST,
-            port: process.env.SMTP_PORT,
-            secure: process.env.SMTP_SECURE,
+            service: 'gmail',
+            // host: process.env.SMTP_HOST, // Removed as we use service: gmail
+            // port: process.env.SMTP_PORT,
+            // secure: process.env.SMTP_SECURE,
             user: process.env.SMTP_USER,
             passLength: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0
         });
@@ -162,9 +163,10 @@ app.get('/api/test-email', async (req, res) => {
             status: 'success',
             message: 'Server is ready to take our messages',
             config: {
-                host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
-                port: process.env.SMTP_PORT || 'default (587)',
-                secure: process.env.SMTP_SECURE || 'default (false)',
+                service: 'gmail',
+                // host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
+                // port: process.env.SMTP_PORT || 'default (587)',
+                // secure: process.env.SMTP_SECURE || 'default (false)',
                 user: process.env.SMTP_USER ? 'Set' : 'Missing',
             }
         });
@@ -177,9 +179,10 @@ app.get('/api/test-email', async (req, res) => {
             code: err.code,
             command: err.command,
             config: {
-                host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
-                port: process.env.SMTP_PORT || 'default (587)',
-                secure: process.env.SMTP_SECURE || 'default (false)',
+                service: 'gmail',
+                // host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
+                // port: process.env.SMTP_PORT || 'default (587)',
+                // secure: process.env.SMTP_SECURE || 'default (false)',
             }
         });
     }
