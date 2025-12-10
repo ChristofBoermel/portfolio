@@ -70,15 +70,17 @@ app.get('/api/portfolio', async (req, res) => {
 
 // Email Transporter Configuration (Gmail)
 const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
+    service: 'gmail', // Built-in transport for Gmail (automatically sets host/port/secure)
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS?.replace(/\s+/g, ''),
     },
+    logger: true, // Log to console
+    debug: true,  // Include debug info
+    // Force IPv4 to prevent IPv6 connectivity issues in some cloud environments
+    family: 4,
     // Fail fast if connection hangs
-    connectionTimeout: 10000, // 10 seconds
+    connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
 });
