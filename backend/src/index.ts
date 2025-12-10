@@ -68,91 +68,21 @@ app.get('/api/portfolio', async (req, res) => {
     }
 });
 
-// Email Transporter Configuration (Gmail)
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // use STARTTLS
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS?.replace(/\s+/g, ''),
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    logger: true,
-    debug: true,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-} as any);
+try {
+    // DB Insert (Parameterized query prevents SQL Injection)
+    await pool.query(
+        'INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)',
+        [name, email, subject, message]
+    );
 
-app.post('/api/contact', async (req, res) => {
-    const { name, email, subject, message } = req.body;
+    // NOTE: Email sending removed due to Render SMTP blocking.
+    // We will handle email sending on the frontend via EmailJS.
 
-    // Validation
-    const errors: string[] = [];
-
-    // Name: Basic check
-    if (!name || name.trim().length === 0) {
-        errors.push('Name cannot be empty.');
-    }
-
-    // Email: Basic validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.push('Invalid email address.');
-    }
-
-    // Non-empty fields
-    if (!subject || subject.trim().length === 0) {
-        errors.push('Subject cannot be empty.');
-    }
-    if (!message || message.trim().length === 0) {
-        errors.push('Message cannot be empty.');
-    }
-
-    if (errors.length > 0) {
-        res.status(400).json({ error: errors.join(' ') });
-        return;
-    }
-
-    try {
-        // DB Insert (Parameterized query prevents SQL Injection)
-        await pool.query(
-            'INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)',
-            [name, email, subject, message]
-        );
-
-        // Send Email
-        const info = await transporter.sendMail({
-            from: `"${name}" <${process.env.SMTP_USER}>`, // sender address (must be authenticated user)
-            replyTo: email, // reply to the visitor
-            to: process.env.SMTP_USER, // list of receivers (send to self)
-            subject: `Portfolio Contact: ${subject}`, // Subject line
-            text: `Message from: ${name} (${email})\n\n${message}`, // plain text body
-            html: `<p><strong>From:</strong> ${name} (${email})</p><p><strong>Message:</strong></p><p>${message}</p>`, // html body
-        });
-
-        console.log("Message sent: %s", info.messageId);
-
-        res.json({ status: 'success', message: 'Message sent successfully' });
-    } catch (err: any) {
-        console.error('Error sending email:', err);
-        if (err.code) console.error('Error Code:', err.code);
-        if (err.command) console.error('Failed Command:', err.command);
-        if (err.response) console.error('SMTP Response:', err.response);
-
-        // Debug Config (don't log full password)
-        console.log('SMTP Config:', {
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false,
-            user: process.env.SMTP_USER,
-            passLength: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0
-        });
-
-        res.status(500).json({ error: 'Failed to send message' });
-    }
+    res.json({ status: 'success', message: 'Message saved successfully' });
+} catch (err: any) {
+    console.error('Database Error:', err);
+    res.status(500).json({ error: 'Failed to save message' });
+}
 });
 
 app.get('/api/test-email', async (req, res) => {
