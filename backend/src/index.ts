@@ -151,6 +151,38 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+app.get('/api/test-email', async (req, res) => {
+    try {
+        console.log('Testing SMTP Connection...');
+        await transporter.verify();
+        console.log('SMTP Connection Success');
+        res.json({
+            status: 'success',
+            message: 'Server is ready to take our messages',
+            config: {
+                host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
+                port: process.env.SMTP_PORT || 'default (587)',
+                secure: process.env.SMTP_SECURE || 'default (false)',
+                user: process.env.SMTP_USER ? 'Set' : 'Missing',
+            }
+        });
+    } catch (err: any) {
+        console.error('SMTP Connection Failed:', err);
+        res.status(500).json({
+            status: 'error',
+            message: 'SMTP Connection Failed',
+            error: err.message,
+            code: err.code,
+            command: err.command,
+            config: {
+                host: process.env.SMTP_HOST || 'default (smtp.gmail.com)',
+                port: process.env.SMTP_PORT || 'default (587)',
+                secure: process.env.SMTP_SECURE || 'default (false)',
+            }
+        });
+    }
+});
+
 app.post('/api/seed', async (req, res) => {
     try {
         await seed();
