@@ -74,7 +74,7 @@ const Contact: React.FC = () => {
                         Contact
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
-                        Get in touch with me (v5 - Template ID Fixed).
+                        Get in touch with me.
                     </p>
                 </div>
 
