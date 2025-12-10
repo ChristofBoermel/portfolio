@@ -7,6 +7,10 @@ RUN npm install
 
 COPY . .
 
+# Build the TypeScript code
+RUN npm run build
+
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Start the production server
+CMD ["npm", "start"]
