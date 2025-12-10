@@ -39,42 +39,13 @@ const Contact: React.FC = () => {
 
     return (
         <section id="contact" className="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
-            {/* Same JSX until button */}
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold uppercase mb-2 relative inline-block after:content-[''] after:block after:w-12 after:h-1 after:bg-primary after:mx-auto after:mt-2 text-dark dark:text-gray-100">
                         Contact
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
-                        Get in touch with me (v2).
-                    </p>
-                </div>
-
-                <div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                        {/* Static contact info blocks - keep as is, too long to include in replace block if I can avoid it? StartLine is generic. */}
-                        {/* I'll skip the middle static parts to keep edit small? No, replace_file_content needs contiguous block. */}
-                        {/* I will scope the replacement to just the helper functions and state at the top, and the form at the bottom. But replace_file_content requires one block. */}
-                        {/* I will use multi_replace for this. */}
-                    </div>
-                </div>
-            </div>
-            {/* ... */}
-        </section>
-    )
-    // Wait, I cannot use replace_file_content efficiently for both top (state) and bottom (button).
-    // I should use multi_replace_file_content.
-
-
-    return (
-        <section id="contact" className="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
-            <div className="container mx-auto px-4">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold uppercase mb-2 relative inline-block after:content-[''] after:block after:w-12 after:h-1 after:bg-primary after:mx-auto after:mt-2 text-dark dark:text-gray-100">
-                        Contact
-                    </h2>
-                    <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
-                        Get in touch with me.
+                        Get in touch with me (v3 - Form Restored).
                     </p>
                 </div>
 
