@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
-import nodemailer from 'nodemailer';
 import { seed } from './seed.js';
 
 dotenv.config();
@@ -68,52 +67,49 @@ app.get('/api/portfolio', async (req, res) => {
     }
 });
 
-try {
-    // DB Insert (Parameterized query prevents SQL Injection)
-    await pool.query(
-        'INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)',
-        [name, email, subject, message]
-    );
+app.post('/api/contact', async (req, res) => {
+    const { name, email, subject, message } = req.body;
 
-    // NOTE: Email sending removed due to Render SMTP blocking.
-    // We will handle email sending on the frontend via EmailJS.
+    // Validation
+    const errors: string[] = [];
 
-    res.json({ status: 'success', message: 'Message saved successfully' });
-} catch (err: any) {
-    console.error('Database Error:', err);
-    res.status(500).json({ error: 'Failed to save message' });
-}
-});
+    // Name: Basic check
+    if (!name || name.trim().length === 0) {
+        errors.push('Name cannot be empty.');
+    }
 
-app.get('/api/test-email', async (req, res) => {
+    // Email: Basic validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Invalid email address.');
+    }
+
+    // Non-empty fields
+    if (!subject || subject.trim().length === 0) {
+        errors.push('Subject cannot be empty.');
+    }
+    if (!message || message.trim().length === 0) {
+        errors.push('Message cannot be empty.');
+    }
+
+    if (errors.length > 0) {
+        res.status(400).json({ error: errors.join(' ') });
+        return;
+    }
+
     try {
-        console.log('Testing SMTP Connection...');
-        await transporter.verify();
-        console.log('SMTP Connection Success');
-        res.json({
-            status: 'success',
-            message: 'Server is ready to take our messages',
-            config: {
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-                user: process.env.SMTP_USER ? 'Set' : 'Missing',
-            }
-        });
+        // DB Insert (Parameterized query prevents SQL Injection)
+        await pool.query(
+            'INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)',
+            [name, email, subject, message]
+        );
+
+        // NOTE: Email sending removed due to Render SMTP blocking.
+        // We will handle email sending on the frontend via EmailJS.
+
+        res.json({ status: 'success', message: 'Message saved successfully' });
     } catch (err: any) {
-        console.error('SMTP Connection Failed:', err);
-        res.status(500).json({
-            status: 'error',
-            message: 'SMTP Connection Failed',
-            error: err.message,
-            code: err.code,
-            command: err.command,
-            config: {
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-            }
-        });
+        console.error('Database Error:', err);
+        res.status(500).json({ error: 'Failed to save message' });
     }
 });
 
