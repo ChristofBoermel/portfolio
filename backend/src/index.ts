@@ -85,8 +85,9 @@ app.post('/api/contact', async (req, res) => {
     const errors: string[] = [];
 
     // Name: No numbers, only letters and spaces
-    if (!/^[a-zA-Z\s]+$/.test(name)) {
-        errors.push('Name must contain only letters and spaces.');
+    // Name: Basic check
+    if (!name || name.trim().length === 0) {
+        errors.push('Name cannot be empty.');
     }
 
     // Email: Basic validation
