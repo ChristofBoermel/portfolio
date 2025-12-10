@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import nodemailer from 'nodemailer';
+import { seed } from './seed.js';
 
 dotenv.config();
 
@@ -66,20 +68,19 @@ app.get('/api/portfolio', async (req, res) => {
     }
 });
 
-import nodemailer from 'nodemailer';
-
 // Email Transporter Configuration (Gmail)
-host: process.env.SMTP_HOST || 'smtp.gmail.com',
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: process.env.SMTP_SECURE === 'true',
-            auth: {
-    user: process.env.SMTP_USER,
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: {
+        user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS?.replace(/\s+/g, ''),
     },
-// Fail fast if connection hangs
-connectionTimeout: 10000, // 10 seconds
+    // Fail fast if connection hangs
+    connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 10000,
-        socketTimeout: 10000,
+    socketTimeout: 10000,
 });
 
 app.post('/api/contact', async (req, res) => {
@@ -88,7 +89,6 @@ app.post('/api/contact', async (req, res) => {
     // Validation
     const errors: string[] = [];
 
-    // Name: No numbers, only letters and spaces
     // Name: Basic check
     if (!name || name.trim().length === 0) {
         errors.push('Name cannot be empty.');
@@ -150,8 +150,6 @@ app.post('/api/contact', async (req, res) => {
         res.status(500).json({ error: 'Failed to send message' });
     }
 });
-
-import { seed } from './seed.js';
 
 app.post('/api/seed', async (req, res) => {
     try {
