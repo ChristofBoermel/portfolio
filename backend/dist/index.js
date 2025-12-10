@@ -60,14 +60,71 @@ app.get('/api/portfolio', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch portfolio' });
     }
 });
+import nodemailer from 'nodemailer';
+// Email Transporter Configuration (Gmail)
+const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || '465'),
+    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS?.replace(/\s+/g, ''),
+    },
+});
 app.post('/api/contact', async (req, res) => {
     const { name, email, subject, message } = req.body;
+    // Validation
+    const errors = [];
+    // Name: No numbers, only letters and spaces
+    if (!/^[a-zA-Z\s]+$/.test(name)) {
+        errors.push('Name must contain only letters and spaces.');
+    }
+    // Email: Basic validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errors.push('Invalid email address.');
+    }
+    // Non-empty fields
+    if (!subject || subject.trim().length === 0) {
+        errors.push('Subject cannot be empty.');
+    }
+    if (!message || message.trim().length === 0) {
+        errors.push('Message cannot be empty.');
+    }
+    if (errors.length > 0) {
+        res.status(400).json({ error: errors.join(' ') });
+        return;
+    }
     try {
+        // DB Insert (Parameterized query prevents SQL Injection)
         await pool.query('INSERT INTO contact_messages (name, email, subject, message) VALUES ($1, $2, $3, $4)', [name, email, subject, message]);
-        res.json({ status: 'success', message: 'Message sent' });
+        // Send Email
+        const info = await transporter.sendMail({
+            from: `"${name}" <${process.env.SMTP_USER}>`, // sender address (must be authenticated user)
+            replyTo: email, // reply to the visitor
+            to: process.env.SMTP_USER, // list of receivers (send to self)
+            subject: `Portfolio Contact: ${subject}`, // Subject line
+            text: `Message from: ${name} (${email})\n\n${message}`, // plain text body
+            html: `<p><strong>From:</strong> ${name} (${email})</p><p><strong>Message:</strong></p><p>${message}</p>`, // html body
+        });
+        console.log("Message sent: %s", info.messageId);
+        res.json({ status: 'success', message: 'Message sent successfully' });
     }
     catch (err) {
-        console.error(err);
+        console.error('Error sending email:', err);
+        if (err.code)
+            console.error('Error Code:', err.code);
+        if (err.command)
+            console.error('Failed Command:', err.command);
+        if (err.response)
+            console.error('SMTP Response:', err.response);
+        // Debug Config (don't log full password)
+        console.log('SMTP Config:', {
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: process.env.SMTP_SECURE,
+            user: process.env.SMTP_USER,
+            passLength: process.env.SMTP_PASS ? process.env.SMTP_PASS.length : 0
+        });
         res.status(500).json({ error: 'Failed to send message' });
     }
 });

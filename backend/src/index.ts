@@ -116,7 +116,8 @@ app.post('/api/contact', async (req, res) => {
 
         // Send Email
         const info = await transporter.sendMail({
-            from: `"${name}" <${email}>`, // sender address
+            from: `"${name}" <${process.env.SMTP_USER}>`, // sender address (must be authenticated user)
+            replyTo: email, // reply to the visitor
             to: process.env.SMTP_USER, // list of receivers (send to self)
             subject: `Portfolio Contact: ${subject}`, // Subject line
             text: `Message from: ${name} (${email})\n\n${message}`, // plain text body

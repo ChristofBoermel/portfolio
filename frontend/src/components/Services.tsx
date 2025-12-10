@@ -9,7 +9,7 @@ const Services: React.FC = () => {
     }, []);
 
     // Simulating icon mapping for now since we store string in DB
-    const getIcon = (iconName: string) => {
+    const getIcon = (_iconName: string) => {
         // Simple placeholder icon
         return (
             <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
