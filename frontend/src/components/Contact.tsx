@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { sendContactMessage } from '../api';
+import emailjs from '@emailjs/browser';
 
 const Contact: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -20,14 +21,42 @@ const Contact: React.FC = () => {
         e.preventDefault();
         setStatus(null);
         setIsLoading(true);
+
+        // EmailJS Credentials (Hardcoded for immediate stability)
+        const SERVICE_ID = "service_zrggtsh";
+        const TEMPLATE_ID = "template_6hdurm2";
+        const PUBLIC_KEY = "DC5uBg1TYvM394FEM";
+
         try {
+            // 1. Save to Backend Database (Reliability & Ownership)
             await sendContactMessage(formData);
+
+            // 2. Send Email via EmailJS (Delivery)
+            await emailjs.send(
+                SERVICE_ID,
+                TEMPLATE_ID,
+                {
+                    from_name: formData.name,
+                    from_email: formData.email, // Ensure template uses this variable for 'Reply-To'
+                    subject: formData.subject,
+                    message: formData.message,
+                    // Common fallback variables just in case template names differ
+                    user_name: formData.name,
+                    user_email: formData.email,
+                },
+                PUBLIC_KEY
+            );
+
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error: any) {
             console.error('Submission Error:', error);
-            // Check if it's a validation error from backend
-            if (error.response && error.response.data && error.response.data.error) {
+            // Even if backend fails, we might still want to try sending email? 
+            // For now, let's treat any error as a failure to keep it simple.
+            if (error.text) {
+                // EmailJS specific error often has .text
+                setStatus('Failed to send email via EmailJS: ' + error.text);
+            } else if (error.response && error.response.data && error.response.data.error) {
                 setStatus(error.response.data.error);
             } else {
                 setStatus('Failed to send message. Please try again later.');
@@ -45,7 +74,7 @@ const Contact: React.FC = () => {
                         Contact
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
-                        Get in touch with me (v3 - Form Restored).
+                        Get in touch with me (v4 - EmailJS).
                     </p>
                 </div>
 
