@@ -7,7 +7,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-const seed = async () => {
+export const seed = async () => {
   try {
     console.log('Seeding database...');
 
@@ -16,8 +16,6 @@ const seed = async () => {
     await pool.query(`DROP TABLE IF EXISTS resume CASCADE`);
     await pool.query(`DROP TABLE IF EXISTS services CASCADE`);
     await pool.query(`DROP TABLE IF EXISTS portfolio CASCADE`);
-    await pool.query(`DROP TABLE IF EXISTS contact_messages CASCADE`);
-
     // Create Profile Table
     await pool.query(`
       CREATE TABLE profile (
@@ -172,11 +170,11 @@ const seed = async () => {
     }
 
     console.log('Seeding completed successfully.');
-    process.exit(0);
+    // process.exit(0);
   } catch (err) {
     console.error('Error seeding database:', err);
-    process.exit(1);
+    throw err; // Re-throw so the API knows it failed
+    // process.exit(1);
   }
 };
 
-seed();

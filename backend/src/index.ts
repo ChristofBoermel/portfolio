@@ -146,6 +146,18 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+import { seed } from './seed.js';
+
+app.post('/api/seed', async (req, res) => {
+    try {
+        await seed();
+        res.json({ status: 'success', message: 'Database seeded successfully' });
+    } catch (err: any) {
+        console.error('Seed failed:', err);
+        res.status(500).json({ error: 'Failed to seed database', details: err.message });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
