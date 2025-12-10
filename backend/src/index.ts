@@ -69,14 +69,17 @@ app.get('/api/portfolio', async (req, res) => {
 import nodemailer from 'nodemailer';
 
 // Email Transporter Configuration (Gmail)
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-    auth: {
-        user: process.env.SMTP_USER,
+        secure: process.env.SMTP_SECURE === 'true',
+            auth: {
+    user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS?.replace(/\s+/g, ''),
     },
+// Fail fast if connection hangs
+connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+        socketTimeout: 10000,
 });
 
 app.post('/api/contact', async (req, res) => {
