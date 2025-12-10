@@ -9,6 +9,7 @@ const Contact: React.FC = () => {
         message: ''
     });
     const [status, setStatus] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Correcting state key mapping for cleaner code
     const handleInputChange = (key: string, value: string) => {
@@ -17,21 +18,53 @@ const Contact: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setStatus(null); // Reset status
+        setStatus(null);
+        setIsLoading(true);
         try {
             await sendContactMessage(formData);
             setStatus('success');
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (error: any) {
-            console.error(error);
+            console.error('Submission Error:', error);
             // Check if it's a validation error from backend
             if (error.response && error.response.data && error.response.data.error) {
                 setStatus(error.response.data.error);
             } else {
-                setStatus('error');
+                setStatus('Failed to send message. Please try again later.');
             }
+        } finally {
+            setIsLoading(false);
         }
     };
+
+    return (
+        <section id="contact" className="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
+            {/* Same JSX until button */}
+            <div className="container mx-auto px-4">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-bold uppercase mb-2 relative inline-block after:content-[''] after:block after:w-12 after:h-1 after:bg-primary after:mx-auto after:mt-2 text-dark dark:text-gray-100">
+                        Contact
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
+                        Get in touch with me.
+                    </p>
+                </div>
+
+                <div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                        {/* Static contact info blocks - keep as is, too long to include in replace block if I can avoid it? StartLine is generic. */}
+                        {/* I'll skip the middle static parts to keep edit small? No, replace_file_content needs contiguous block. */}
+                        {/* I will scope the replacement to just the helper functions and state at the top, and the form at the bottom. But replace_file_content requires one block. */}
+                        {/* I will use multi_replace for this. */}
+                    </div>
+                </div>
+            </div>
+            {/* ... */}
+        </section>
+    )
+    // Wait, I cannot use replace_file_content efficiently for both top (state) and bottom (button).
+    // I should use multi_replace_file_content.
+
 
     return (
         <section id="contact" className="py-20 bg-white dark:bg-gray-800 transition-colors duration-300">
@@ -112,7 +145,13 @@ const Contact: React.FC = () => {
                         {status && status !== 'success' && <p className="text-red-500 text-center">{status === 'error' ? 'Failed to send message.' : status}</p>}
 
                         <div className="text-center">
-                            <button type="submit" className="bg-primary text-white px-8 py-3 rounded-full uppercase text-sm font-semibold hover:bg-green-600 transition-colors">Send Message</button>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className={`bg-primary text-white px-8 py-3 rounded-full uppercase text-sm font-semibold hover:bg-green-600 transition-colors ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            >
+                                {isLoading ? 'Sending...' : 'Send Message'}
+                            </button>
                         </div>
                     </form>
                 </div>
