@@ -24,7 +24,7 @@ const Contact: React.FC = () => {
 
         // EmailJS Credentials (Hardcoded for immediate stability)
         const SERVICE_ID = "service_zrggtsh";
-        const TEMPLATE_ID = "template_6hdurm2";
+        const TEMPLATE_ID = "template_ziur7kr"; // Updated by user
         const PUBLIC_KEY = "DC5uBg1TYvM394FEM";
 
         try {
@@ -74,7 +74,7 @@ const Contact: React.FC = () => {
                         Contact
                     </h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
-                        Get in touch with me (v4 - EmailJS).
+                        Get in touch with me (v5 - Template ID Fixed).
                     </p>
                 </div>
 
